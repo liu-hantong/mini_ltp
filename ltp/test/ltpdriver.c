@@ -7,9 +7,9 @@
 /*	Author: Scott Burleigh, Jet Propulsion Laboratory		*/
 /*									*/
 
-#include "platform.h"
-#include "zco.h"
-#include "ltpP.h"
+#include "platform.h" // include/platform.h
+#include "zco.h" 	  // include/zco.h
+#include "ltpP.h"	  // library/ltpP.h
 
 #define	DEFAULT_ADU_LENGTH	(60000)
 
@@ -48,19 +48,27 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 		PUTS("  ltpcounter.");
 		return 0;
 	}
-
-	if (ltp_attach() < 0)
+	// inc: include/ltp.h from library/ltpP.h
+	// def: library/libltp.c contains utility funcs for LTP apps
+	if (ltp_attach() < 0) // -> ltpAttach() -> library/libltpP.c 
+						  // attach to ION and ltp database
 	{
 		putErrmsg("ltpdriver can't initialize LTP.", NULL);
 		return 1;
 	}
+	// inc: include/ion.h from ???
+	// def: ici/library/ion.c functions common to multiple protocols in the ION stack
+	sdr = getIonsdr();     // -> _ionsdr() -> a NULL Sdr
+					       // an abstract Spacecraft Data Recorder.
+					       // explanation in include/sdt.h
 
-	sdr = getIonsdr();
-	if (sduLength == 1)
+	if (sduLength == 1)    // what is sdu?
+						   // sduLength -> library/libltpP.h?
 	{
 		randomSduLength = 1;
 	}
 
+	// create an adu file?
 	aduFile = open("ltpdriverSduFile", O_WRONLY | O_CREAT, 0666);
 	if (aduFile < 0)
 	{
@@ -68,6 +76,7 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 		return 0;
 	}
 
+	// send random bytes out?
 	if (randomSduLength)
 	{
 		bytesRemaining = 65536;
