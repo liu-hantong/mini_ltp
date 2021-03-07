@@ -1,5 +1,9 @@
 ```bash
 export LD_LIBRARY_PATH=/home/lht/mini_ltp/ltp/i86-redhat/lib"
+
+sudo cp ../lib/libltp.so /usr/lib
+sudo cp ../lib/libici.so /usr/lib
+
 ./ltp/i86-redhat/bin/ltpadmin
 ```
 
@@ -10,7 +14,16 @@ ltp
         include: platform.h/zco.h/ltpP.h
         run_ltpdriver()
             ltp_attach() <library/libltp.c include/ltp.h>
-            
+        
+        ➜  bin git:(master) ✗ ./ltpdriver 10 10 1 0 7 
+        at line 59 of library/platform_sm.c, Can't get shared memory segment: Invalid argument (0)
+        at line 286 of library/memmgr.c, Can't open memory region.
+        at line 342 of sdr/sdrxn.c, Can't open SDR working memory.
+        at line 483 of sdr/sdrxn.c, Can't open SDR working memory.
+        at line 611 of library/ion.c, Can't initialize the SDR system.
+        at line 1061 of ../library/libltpP.c, LTP can't attach to ION.
+        at line 54 of ../test/ltpdriver.c, ltpdriver can't initialize LTP.
+
     include
         platform.h
         zco.h

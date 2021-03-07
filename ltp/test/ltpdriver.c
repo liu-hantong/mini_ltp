@@ -15,6 +15,21 @@
 
 static int	run_ltpdriver(uvast destEngineId, int clientId,
 			int cyclesRemaining, int greenLength, int sduLength)
+
+/*
+	destEngineID:
+		A number that uniquely identifies a given LTP engine, within some
+   		closed set of communicating LTP engines.  Note that when LTP is
+   		operating underneath the Delay-Tolerant Networking (DTN) [DTN] Bundle
+   		Protocol [BP], the convergence layer adapter mediating the two will
+   		be responsible for translating between DTN endpoint IDs and LTP
+		engine IDs in an implementation-specific manner
+	clientID: identification purpose?
+	cyclesRemaining: send how many rounds
+	sduLength: red part + green part 's length
+	greenLength: green part's length
+*/
+
 {
 	static char	buffer[DEFAULT_ADU_LENGTH] = "test...";
 	Sdr		sdr;
@@ -50,6 +65,10 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 	}
 	// inc: include/ltp.h from library/ltpP.h
 	// def: library/libltp.c contains utility funcs for LTP apps
+
+	// at line 611 of library/ion.c, Can't initialize the SDR system.
+	// first argument must >= 4096
+
 	if (ltp_attach() < 0) // -> ltpAttach() -> library/libltpP.c 
 						  // attach to ION and ltp database
 	{
@@ -63,7 +82,9 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 					       // explanation in include/sdt.h
 
 	if (sduLength == 1)    // what is sdu?
-						   // sduLength -> library/libltpP.h?
+						   // sduLength -> library/libltpP.h
+						   // sdu length, length that wrote to ADU file created
+						   // below, in this case, is "test...."'s length
 	{
 		randomSduLength = 1;
 	}
@@ -96,7 +117,8 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 		{
 			bytesToWrite = DEFAULT_ADU_LENGTH;
 		}
-
+		
+		// write "test...." string to aduFile (just created)
 		if (write(aduFile, buffer, bytesToWrite) < 0)
 		{
 			close(aduFile);
@@ -109,9 +131,23 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 
 //sdr_start_trace(sdr, 10000000, NULL);
 	close(aduFile);
-	CHKZERO(sdr_begin_xn(sdr));
+
+	// inc: ltp/include/sdrxn.h:
+	// def: ltp/ici/sdr/sdrxn.c
+		// This library implements the transaction mechanism underlying the
+ 		// Simple Data Recorder system.
+	// def: ./include/platform.h:#define CHKZERO(e) if (!(e) && iEnd(#e)) return 0
+	CHKZERO(sdr_begin_xn(sdr)); // 检查开头是不是0？
+	// create a file reference? (file descriptor)
+	
+	// inc: include/zco.h
+	// def: ici/library/zco.c
+		// API for using zero-copy objects to implement
+		// deeply stacked communication protocols.
 	fileRef = zco_create_file_ref(sdr, "ltpdriverSduFile", NULL,
 			ZcoOutbound);
+	
+	// same as sdr_end_xn
 	if (sdr_end_xn(sdr) < 0 || fileRef == 0)
 	{
 		putErrmsg("ltpdriver can't create file ref.", NULL);
@@ -121,9 +157,10 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 	startTime = time(NULL);
 	while (running && cyclesRemaining > 0)
 	{
+		// main loop, send as cycles
 		if (randomSduLength)
 		{
-			sduLength = ((rand() % 60) + 1) * 1024;
+			sduLength = ((rand() % 60) + 1) * 1024; // 60 - 60 * 1024
 		}
 
 		redLength = sduLength - greenLength;
@@ -132,8 +169,16 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 			redLength = 0;
 		}
 
+		// inc: include/ion.h
+		// def: ici/library/ion.c
 		zco = ionCreateZco(ZcoFileSource, fileRef, 0, sduLength, 0,
 				0, ZcoOutbound, NULL);
+
+		// Object
+			// def: include/sdrxn.h
+			// absolute offsets from
+ 			// the start of an SDR heap; they are functionally equivalent
+			// to pointers in DRAM.
 		if (zco == 0 || zco == (Object) ERROR)
 		{
 			putErrmsg("ltpdriver can't create ZCO.", NULL);
@@ -145,7 +190,7 @@ static int	run_ltpdriver(uvast destEngineId, int clientId,
 				&sessionId))
 		{
 		case 0:
-			putErrmsg("ltpdriver can't send SDU.",
+			putErrmsg("ltpdriver can't send SDU.", 
 					itoa(sduLength));
 			break;		/*	Out of switch.		*/
 

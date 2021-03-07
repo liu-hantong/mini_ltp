@@ -54,9 +54,11 @@ sm_ShmAttach(int key, int size, char **shmPtr, uaddr *id)
 	}
 
     /* create a new shared memory segment, or attach to an existing one */
+	// if ((*id = shmget(key, size, IPC_CREAT | 0666)) == -1)
 	if ((*id = shmget(key, size, IPC_CREAT | 0666)) == -1)
 	{
-		putSysErrmsg("Can't get shared memory segment", itoa(size));
+		putSysErrmsg("shmget error type", itoa(size));
+
 		return -1;
 	}
 

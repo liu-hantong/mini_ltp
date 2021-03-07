@@ -1,18 +1,14 @@
 /*
-
 	sdrxn.h:	definitions supporting use of the SDR
 			transaction mechanism.
-
 	Author: Scott Burleigh, JPL
 	
 	Modification History:
 	Date      Who	What
 	06-05-07  SCB	Initial abstraction from original SDR API.
-
 	Copyright (c) 2001-2007 California Institute of Technology.
 	ALL RIGHTS RESERVED.  U.S. Government Sponsorship
 	acknowledged.
-
 									*/
 #ifndef _SDRXN_H_
 #define _SDRXN_H_
@@ -83,7 +79,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				processor reboots, in order to
 				re-establish access to the SDR from
 				multiple tasks on that processor.
-
 				At the time the profile is loaded,
 				we check to see whether or not the
 				named SDR already exists.  If it
@@ -94,7 +89,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				log contains any log entries).  If
 				it does not, then we create and
 				initialize the SDR.
-
 			 	"name" is the name of the SDR.
 				The "configFlags" value must be some
 				logical disjunction of configuration
@@ -104,7 +98,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				(long integers).  The SDR's total data
 				space size in bytes is given by
 			       	(heapWords * word size) + map size.
-
 				On creation of the SDR, where the
 				SDR_IN_DRAM option is selected, if
 				"heapKey" is SM_NO_KEY then a region of
@@ -117,7 +110,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				of shared memory of length equal to
 				the total data space size, shared
 				using the indicated key.
-
 				"logSize" is the amount of memory
 				that will be made available for the
 				transaction reversibility log.  If
@@ -127,7 +119,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				is zero then the transaction
 				reversibility log will be written
 				to a file rather than to memory.
-
 				On creation of the SDR, where the
 				SDR_REVERSIBLE option is selected
 				and logSize is greater than zero, if
@@ -141,7 +132,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				of shared memory of length equal to
 				the log size, shared using the
 				indicated key.
-
 				If SDR_IN_FILE is selected, or if
 				SDR_REVERSIBLE is selected and
 				"logSize" is zero, then the path
@@ -158,7 +148,6 @@ extern int		sdr_load_profile(char *name, int configFlags,
 				indicated name and of the size given
 				by total data space size will be
 				created and filled with zeros.
-
 				If a cleanup task must be run whenever
 				a transaction is reversed, the command
 				to execute this task must be provided
